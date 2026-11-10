@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cómo se hizo · ¿Se cayó internet o solo yo?</title>
+  <meta name="description" content="La investigación detrás de «¿Se cayó internet o solo yo?»: qué mide cada fuente, por qué esos umbrales, cómo se decide el veredicto y sus limitaciones.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bangers&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="../css/estilo.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F9F9F7'/%3E%3Cpath d='M3 13a19 19 0 0 1 26 0M8 18a12 12 0 0 1 16 0M13 23a5 5 0 0 1 6 0' fill='none' stroke='%230A090A' stroke-width='3'/%3E%3Cpath d='M6 4l20 24' stroke='%23CB433E' stroke-width='3.5'/%3E%3C/svg%3E">
+  <script type="module" src="../js/proceso.js"></script>
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="cabecera">
+    <span class="kanji" aria-hidden="true">断線</span>
+    <div class="titulo">
+      <p class="antetitulo">Cómo se hizo</p>
+      <h1>¿Se cayó internet o solo yo?</h1>
+    </div>
+    <nav class="nav">
+      <a class="boton-linea" href="../">Volver a la herramienta</a>
+      <button type="button" class="boton-linea" id="tema" aria-label="Cambiar tema">Tema: auto</button>
+    </nav>
+  </header>
+
+  <main class="articulo" id="contenido">
+    <nav class="indice vineta" aria-label="Índice">
+      <ol>
+        <li><a href="#problema">El problema</a></li>
+        <li><a href="#fuentes">Las fuentes</a></li>
+        <li><a href="#metodo">El método</a></li>
+        <li><a href="#caida">Una caída real</a></li>
+        <li><a href="#diseno">Diseño</a></li>
+        <li><a href="#limites">Limitaciones</a></li>
+        <li><a href="#referencias">Referencias</a></li>
+      </ol>
+    </nav>
+
+    <section class="bloque" id="problema">
+      <h2>El problema</h2>
+      <p>Cuando algo deja de cargar, la primera pregunta es siempre la misma: <strong>¿es mi wifi, es mi operador, es el país o es la aplicación?</strong> La respuesta cambia lo que conviene hacer: reiniciar el router, llamar al operador, esperar o cambiar de app.</p>
+      <p>La idea sale del trabajo «Caída de Internet: informe detallado» y de la lista de herramientas de ciberseguridad de este proyecto (fila 17). La herramienta hace una sola cosa: junta cuatro miradas distintas y responde en una palabra.</p>
+      <ol class="tuberia" aria-label="Las cuatro miradas">
+        <li><span class="paso">Mirada 1</span><strong>Tu equipo</strong><small>¿Tu navegador llega a 6 sitios grandes?</small></li>
+        <li><span class="paso">Mirada 2</span><strong>Colombia</strong><small>¿El país sigue visible en Internet? (IODA)</small></li>
+        <li><span class="paso">Mirada 3</span><strong>Operadores</strong><small>¿Claro, Movistar, Tigo UNE y ETB siguen visibles? (IODA + RIPEstat)</small></li>
+        <li><span class="paso">Mirada 4</span><strong>Servicios</strong><small>¿GitHub, Discord, ChatGPT… reportan fallas? (Statuspage)</small></li>
+      </ol>
+    </section>
+
+    <section class="bloque" id="fuentes">
+      <h2>Las fuentes</h2>
+      <p>Requisito del proyecto: solo APIs <strong>sin clave</strong> que el navegador pueda leer directamente. Eso exige <abbr title="Cross-Origin Resource Sharing">CORS</abbr>: que el servidor responda con la cabecera <code>Access-Control-Allow-Origin</code>, que autoriza a otra página a leer su respuesta. Cada fuente se probó con <code>curl</code> el 10 nov 2026.</p>
+      <div class="tabla-envoltura">
+        <table class="tabla-fuentes">
+          <thead><tr><th scope="col">Fuente</th><th scope="col">Qué mide</th><th scope="col">CORS</th><th scope="col">Uso</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">IODA · BGP</th><td>Bloques de direcciones /24 que el país u operador anuncia al resto de Internet. Si caen, las redes «desaparecen del mapa».</td><td>Sí (refleja el origen)</td><td><span class="tag est-normal">usada</span></td></tr>
+            <tr><th scope="row">IODA · sondeo activo</th><td>Cuántos bloques /24 responden a pings enviados desde Georgia Tech cada 10 min.</td><td>Sí</td><td><span class="tag est-normal">usada</span></td></tr>
+            <tr><th scope="row">IODA · telescopio</th><td>Tráfico de fondo no solicitado que llega desde el país a un rango sin uso (Merit Network). Si un país se apaga, ese ruido baja.</td><td>Sí</td><td><span class="tag est-normal">usada</span></td></tr>
+            <tr><th scope="row">IODA · alertas y eventos</th><td>Las alertas y caídas que IODA ya detectó (para historia y para avisar).</td><td>Sí</td><td><span class="tag est-normal">usada</span></td></tr>
+            <tr><th scope="row">RIPEstat · visibility</th><td>Cuántos pares de RIS (colectores de rutas del RIPE NCC) con tabla completa ven las rutas de cada operador.</td><td>Sí (<code>*</code>)</td><td><span class="tag est-normal">usada</span></td></tr>
+            <tr><th scope="row">Statuspage · status.json</th><td>Indicador oficial de cada servicio: none, minor, major, critical. En Cloudflare también los centros de Bogotá, Medellín, Barranquilla y Cali.</td><td>Sí (<code>*</code>)</td><td><span class="tag est-normal">usada</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dos-col">
+        <figure class="figura vineta">
+          <h3>¿Qué tan fresco es cada dato?</h3>
+          <div class="g-caja" id="g-retraso" role="img" aria-label="Retraso medido de cada fuente el 10 de noviembre de 2026"></div>
+          <figcaption>Minutos entre la consulta y el último dato no vacío, medido el 10 nov 2026 a las 5:57 p. m. (calculado aquí). RIPEstat actualiza la visibilidad cada pocas horas: por eso solo puede «avisar», nunca declarar una caída si su dato tiene más de 2 h.</figcaption>
+        </figure>
+        <div class="vineta">
+          <h3>Fuentes descartadas</h3>
+          <ul class="descartes">
+            <li><strong>RIPEstat routing-status:</strong> 21 s en una consulta y más de 60 s en otra cuando el dato no está en caché. Demasiado lento para una página que debe responder ya. Incluso <code>visibility</code> pasó de 40 s con Claro hogar: la herramienta la corta a los 20 s y sigue con IODA.</li>
+            <li><strong>RIPEstat country-routing-stats:</strong> resolución diaria y 272 KB por consulta. Sirve para historia, no para «ahora».</li>
+            <li><strong>AS27831 (Colombia Móvil):</strong> RIPEstat lo marca sin prefijos anunciados; no hay nada que medir.</li>
+            <li><strong>Statuspage de Slack y Notion:</strong> la dirección antigua redirige; la de Slack termina en un 404 y la de Notion en una página HTML, sin API. (Zoom también redirige, pero su dominio nuevo <code>www.zoomstatus.com</code> sí responde con CORS: se usa ese.)</li>
+            <li><strong>Netflix y Spotify:</strong> sus direcciones de estado no respondieron (no usan Statuspage).</li>
+            <li><strong>Pérdida de paquetes de IODA (<code>ping-slash24-loss</code>):</strong> ronda el 52 % aun en un día normal; no distingue una caída.</li>
+            <li><strong>Varias fuentes de IODA en una sola petición:</strong> la API rechaza <code>datasource=bgp,ping-slash24</code>; se hace una petición por fuente.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloque" id="metodo">
+      <h2>El método</h2>
+      <h3>1 · Cada señal se compara consigo misma</h3>
+      <p>Para cada serie de las últimas 24 h se toma el último dato y se divide por la <strong>mediana</strong> de las 24 h anteriores. La mediana (el valor del medio al ordenar) no se deja arrastrar por un pico aislado. Una razón de 100 % es un día normal; 6 % es casi todo apagado.</p>
+      <div class="tabla-envoltura">
+        <table class="tabla-fuentes umbrales">
+          <thead><tr><th scope="col">Señal</th><th scope="col">Normal</th><th scope="col">Raro</th><th scope="col">Caída</th><th scope="col">Por qué</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">BGP</th><td>≥ 97 %</td><td>90–97 %</td><td>&lt; 90 %</td><td>En un día normal casi no se mueve (Colombia, 10 nov: entre 66 298 y 66 459 bloques en 24 h, una variación de 0,2 %).</td></tr>
+            <tr><th scope="row">Sondeo activo</th><td>≥ 85 %</td><td>70–85 %</td><td>&lt; 70 %</td><td>IODA marca alerta crítica bajo 80 % (se ve en sus alertas: <code>condition: "&lt; 0.8"</code>). Aquí «raro» empieza antes.</td></tr>
+            <tr><th scope="row">Telescopio</th><td>≥ 60 %</td><td>40–60 %</td><td>&lt; 40 %</td><td>Es ruidoso: el 10 nov osciló entre 71 % y 157 % de su mediana (calculado aquí). Con un umbral de 75 %, 6 de 267 puntos de un día normal habrían salido «raros».</td></tr>
+            <tr><th scope="row">Visibilidad RIPE</th><td>≥ 90 %</td><td>50–90 %</td><td>&lt; 50 %</td><td>Con 320 pares, perder un 10 % ya es raro. Si el dato tiene más de 2 h, solo avisa.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="nota-fuente">Los umbrales son una decisión propia (calculado aquí), guiada por el de IODA y por los datos reales del 10 nov y del 15 oct 2026. Además: si la mediana del sondeo es menor que 100 bloques, no se juzga (las redes móviles casi no responden al ping: Claro móvil tiene unos 24).</p>
+
+      <h3>2 · Una sola señal no basta</h3>
+      <p>Para decir «caída» de un país u operador hace falta que <strong>BGP caiga</strong> (es la más estable) o que <strong>dos señales caigan a la vez</strong>. Si solo cae una, el estado es «raro». Esta regla salió de mirar la caída del 15 oct (ver abajo).</p>
+
+      <h3>3 · El veredicto, en orden</h3>
+      <ol class="etapas">
+        <li><strong>Solo tú</strong> si tu navegador no llega a ningún sitio y ninguna fuente respondió.</li>
+        <li><strong>Sí</strong> si Colombia está en caída.</li>
+        <li><strong>Sí, en «operador»</strong> si un operador está en caída.</li>
+        <li><strong>Quizá</strong> si algo está raro sin confirmar (o IODA tiene una alerta activa).</li>
+        <li><strong>No: es «servicio»</strong> si un servicio reporta falla grande (major o critical) o un centro de Cloudflare en Colombia está caído.</li>
+        <li><strong>Solo tú</strong> si Colombia está bien pero llegas a menos del 80 % de los sitios, o la mediana pasa de 1,5 s.</li>
+        <li><strong>No sé</strong> si no se pudo leer a Colombia.</li>
+        <li><strong>No</strong> en cualquier otro caso.</li>
+      </ol>
+      <p>Toda esta lógica vive en funciones puras (<code>js/senales.js</code>, <code>js/evaluar.js</code>, <code>js/veredicto.js</code>) con 27 pruebas <code>node --test</code> que usan respuestas reales guardadas en <code>test/muestras/</code>.</p>
+      <h3>4 · «¿Solo yo?»: la prueba local</h3>
+      <p>El navegador pide un recurso mínimo a Google, Cloudflare, Wikipedia, Microsoft, Amazon y GOV.CO en modo <code>no-cors</code>: no lee la respuesta (no hace falta) y cualquier respuesta cuenta como «llegó». Mide el tiempo total, que incluye resolver el nombre (DNS) y abrir la conexión cifrada (TLS).</p>
+    </section>
+
+    <section class="bloque" id="caida">
+      <h2>Una caída real: 15 oct 2026</h2>
+      <figure class="figura vineta">
+        <div class="g-caja" id="g-caida" role="img" aria-label="Las tres señales de Colombia el 15 de octubre de 2026: el sondeo activo cae al 6 % mientras BGP y el telescopio siguen en 100 %"></div>
+        <figcaption>Señales de Colombia en IODA, 24 h hasta las 5:50 p. m. del 15 oct (hora de Colombia), divididas por su mediana. Línea discontinua = 100 %. Datos reales guardados en <code>datos/caida-2026-10-15.json</code>.</figcaption>
+      </figure>
+      <div class="dos-col">
+        <div class="vineta cifras">
+          <h3>Lo que muestran los datos</h3>
+          <ul>
+            <li>IODA registró un evento de 40 min desde las 5:20 p. m. y emitió una alerta crítica: el sondeo activo bajó a 849 bloques frente a una referencia de 14 578 (6 %).</li>
+            <li>Antes de ese dato, la serie del sondeo tiene <strong>70 minutos vacíos</strong>.</li>
+            <li>En el mismo momento, BGP siguió en 66 453 bloques y el telescopio no se movió.</li>
+            <li>Claro hogar, Movistar y Tigo UNE cayeron a la vez en el sondeo; ETB y Claro móvil no tuvieron alerta.</li>
+          </ul>
+        </div>
+        <div class="vineta">
+          <h3>Cómo se lee</h3>
+          <p>Si Colombia se hubiera desconectado, las redes habrían dejado de anunciarse (BGP) y el ruido del telescopio habría bajado. Que solo cayera el ping, justo después de un hueco en la medición, sugiere un problema del medidor o de un tramo intermedio, no un apagón del país.</p>
+          <p>Por eso la herramienta dice <strong>«Quizá»</strong> en un caso así, y no <strong>«Sí»</strong>. Una prueba automática reproduce exactamente este momento.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloque" id="diseno">
+      <h2>Diseño</h2>
+      <div class="dos-col">
+        <div class="vineta">
+          <h3>Una palabra, tres tonos</h3>
+          <p>La respuesta ocupa la viñeta más grande y se lee de lejos. Cada tono trae su onomatopeya, como en un cómic:</p>
+          <div class="versiones-v">
+            <div class="mini-v" data-tono="calma"><span class="mv-o">PING</span><span class="mv-t">No</span><small>todo normal</small></div>
+            <div class="mini-v" data-tono="ambar"><span class="mv-o">¿BZZT?</span><span class="mv-t">Quizá</span><small>raro o un servicio caído</small></div>
+            <div class="mini-v" data-tono="rojo"><span class="mv-o">¡CRAC!</span><span class="mv-t">Sí</span><small>caída en Colombia o un operador</small></div>
+          </div>
+          <p class="nota-fuente">El kanji 断線 (<em>dansen</em>) significa «línea cortada».</p>
+        </div>
+        <div class="vineta">
+          <h3>Paleta</h3>
+          <div class="paleta">
+            <span style="--c:#F9F9F7">Papel<br><code>#F9F9F7</code></span>
+            <span class="osc" style="--c:#0A090A">Tinta<br><code>#0A090A</code></span>
+            <span class="osc" style="--c:#CB433E">Caída<br><code>#CB433E</code></span>
+            <span style="--c:#438FB8">Normal<br><code>#438FB8</code></span>
+            <span style="--c:#F2C76E">Raro<br><code>#F2C76E</code></span>
+            <span class="osc" style="--c:#141C33">Noche<br><code>#141C33</code></span>
+          </div>
+          <p class="nota-fuente">Cian para lo que está bien (dato frío), ámbar para lo dudoso y rojo solo para una caída. El estado se escribe siempre con palabra, no solo con color.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloque" id="limites">
+      <h2>Limitaciones</h2>
+      <ul>
+        <li><strong>No es un monitor oficial.</strong> Para reportar una falla, llama a tu operador; para estadísticas oficiales del sector, consulta a la autoridad de comunicaciones.</li>
+        <li><strong>Las fuentes llegan tarde.</strong> El sondeo activo va unos 17 min atrás, BGP unos 42 min y el telescopio cerca de 1 h. Una caída de 5 minutos puede no verse.</li>
+        <li><strong>Mide redes, no barrios.</strong> Si se cae la fibra de tu cuadra, IODA no lo ve: la herramienta dirá «Solo tú», que es lo correcto desde tu punto de vista.</li>
+        <li><strong>Redes móviles.</strong> Casi no responden al ping (por el uso compartido de direcciones, CGNAT), así que para Claro móvil solo cuentan BGP y RIPEstat.</li>
+        <li><strong>La prueba local</strong> puede fallar por un bloqueador de anuncios o un firewall de empresa aunque tengas internet. Además, al hacerla, tu IP llega a esos seis sitios (como al visitar cualquier página). La herramienta no guarda nada.</li>
+        <li><strong>Statuspage es lo que dice cada empresa.</strong> Cloudflare marca «minor» casi siempre porque tiene más de 300 centros en el mundo; por eso «minor» no cambia el veredicto.</li>
+      </ul>
+      <div class="vineta errata">
+        <h3>Fe de erratas de las fuentes</h3>
+        <ul>
+          <li>En las alertas de IODA para Colombia la entidad se identifica como <code>geo.netacuity.SA.CO</code> (base de geolocalización NetAcuity), mientras que las series de pérdida y latencia del mismo sondeo dicen <code>geo_db: "ipinfo"</code>. Dos bases distintas pueden asignar algunas redes a países diferentes.</li>
+          <li>El evento del 15 oct figura como caída del país, aunque BGP y telescopio siguieron normales (ver arriba).</li>
+          <li>La respuesta de RIPEstat dice <code>query_time</code> 4:00 p. m. UTC para una consulta hecha casi 7 h después: el dato «actual» es el del último volcado.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="bloque" id="referencias">
+      <h2>Referencias</h2>
+      <ul class="fuentes">
+        <li>IODA — Internet Outage Detection and Analysis, Georgia Tech: <a href="https://ioda.inetintel.cc.gatech.edu/country/CO">tablero de Colombia</a> · <a href="https://api.ioda.inetintel.cc.gatech.edu/v2/">API v2</a>. Datos © Georgia Tech Research Corporation.</li>
+        <li>RIPEstat, RIPE NCC: <a href="https://stat.ripe.net/docs/data-api/">documentación de la API de datos</a> (visibility, as-overview).</li>
+        <li>Atlassian Statuspage: <a href="https://www.githubstatus.com/api">API pública v2</a> (mismo formato en todos los servicios usados).</li>
+        <li>Merit Network, telescopio de red (fuente <code>merit-nt</code> en IODA).</li>
+      </ul>
+      <a class="volver" href="../">Volver a la herramienta</a>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Código MIT. Datos de IODA (Georgia Tech), RIPEstat (RIPE NCC) y páginas de estado públicas.</p>
+    <p class="creditos"><a href="https://github.com/ale0009" target="_blank" rel="noopener">Mario Puerta «ale0009»</a> × <a href="https://www.linkedin.com/in/davidalexanderrinconcorredorkuronoma/" target="_blank" rel="noopener">David Rincón «Kuronoma»</a> <a href="#">Portafolio</a></p>
+  </footer>
+</body>
+</html>

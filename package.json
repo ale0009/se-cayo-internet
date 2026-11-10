@@ -1,0 +1,11 @@
+{
+  "name": "se-cayo-internet",
+  "version": "1.0.0",
+  "description": "¿Se cayó internet o solo yo? Estado en vivo de Internet en Colombia (IODA, RIPEstat, Statuspage) y prueba local. Página estática sin build.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "Mario Alejandro Puerta Alarcón",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" }
+}

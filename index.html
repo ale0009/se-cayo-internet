@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>¿Se cayó internet o solo yo?</title>
+  <meta name="description" content="Estado en vivo de Internet en Colombia: señales de IODA y RIPEstat por país y operador, páginas de estado de servicios grandes y una prueba de tu propia conexión.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bangers&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F9F9F7'/%3E%3Cpath d='M3 13a19 19 0 0 1 26 0M8 18a12 12 0 0 1 16 0M13 23a5 5 0 0 1 6 0' fill='none' stroke='%230A090A' stroke-width='3'/%3E%3Cpath d='M6 4l20 24' stroke='%23CB433E' stroke-width='3.5'/%3E%3C/svg%3E">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="saltar" href="#veredicto">Saltar a la respuesta</a>
+  <header class="cabecera">
+    <span class="kanji" aria-hidden="true">断線</span>
+    <div class="titulo">
+      <p class="antetitulo">Colombia en vivo · IODA · RIPEstat · Statuspage</p>
+      <h1>¿Se cayó internet o solo yo?</h1>
+    </div>
+    <nav class="nav">
+      <a class="boton-linea" href="proceso/">Cómo se hizo</a>
+      <button type="button" class="boton-linea" id="tema" aria-label="Cambiar tema">Tema: auto</button>
+    </nav>
+  </header>
+
+  <main class="tablero">
+    <section class="respuesta vineta" id="respuesta" data-tono="carga" aria-live="polite" aria-labelledby="veredicto">
+      <span class="onoma" id="onoma" aria-hidden="true">PING…</span>
+      <p class="veredicto" id="veredicto"><span class="cargando-txt">Consultando…</span></p>
+      <p class="explica" id="explica">Midiendo tu conexión y pidiendo las señales de Colombia.</p>
+      <p class="estado" id="estado"><span class="chip chip-carga">Cargando</span></p>
+      <button type="button" class="boton-linea" id="otra-vez">Probar otra vez</button>
+    </section>
+
+    <section class="local vineta" aria-labelledby="local-t">
+      <h2 id="local-t">¿Solo yo? <small>tu conexión, ahora</small></h2>
+      <p class="sub" id="local-res">Probando 6 sitios desde tu navegador…</p>
+      <ol class="sitios" id="sitios"></ol>
+    </section>
+
+    <section class="pais vineta" aria-labelledby="pais-t">
+      <h2 id="pais-t">Colombia <small>últimas 24 h · IODA</small></h2>
+      <div class="senales" id="senales"><p class="sub">Cargando señales…</p></div>
+      <p class="historial" id="historial"></p>
+      <p class="estado-fuente" id="pais-fuente"></p>
+    </section>
+
+    <section class="operadores vineta" aria-labelledby="op-t">
+      <h2 id="op-t">Operadores</h2>
+      <div class="tabla-envoltura">
+        <table class="tabla-op">
+          <thead><tr><th scope="col">Red</th><th scope="col"><abbr title="Rutas anunciadas (IODA)">BGP</abbr></th><th scope="col"><abbr title="Redes que responden al ping (IODA)">Sondeo</abbr></th><th scope="col"><abbr title="Pares de RIS que ven sus rutas (RIPEstat)">Visible</abbr></th><th scope="col">Estado</th></tr></thead>
+          <tbody id="ops"></tbody>
+        </table>
+      </div>
+      <p class="estado-fuente" id="op-fuente"></p>
+    </section>
+
+    <section class="servicios vineta" aria-labelledby="srv-t">
+      <h2 id="srv-t">Servicios grandes</h2>
+      <ul class="rejilla-srv" id="srv"></ul>
+      <p class="sub pops-t">Centros de Cloudflare en Colombia</p>
+      <ul class="pops" id="pops"></ul>
+      <p class="estado-fuente" id="srv-fuente"></p>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Datos: <a href="https://ioda.inetintel.cc.gatech.edu/country/CO">IODA, Georgia Tech</a> · <a href="https://stat.ripe.net/">RIPEstat, RIPE NCC</a> · páginas de estado públicas de cada servicio. No es un monitor oficial: para reportar una falla, llama a tu operador.</p>
+    <p class="creditos"><a href="https://github.com/ale0009" target="_blank" rel="noopener">Mario Puerta «ale0009»</a> × <a href="https://www.linkedin.com/in/davidalexanderrinconcorredorkuronoma/" target="_blank" rel="noopener">David Rincón «Kuronoma»</a> <a href="#">Portafolio</a></p>
+  </footer>
+</body>
+</html>
